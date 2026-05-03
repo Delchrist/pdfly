@@ -19,16 +19,8 @@ export default async function handler(req, res) {
       return res.redirect(302, '/?login=expired');
     }
 
-    // Check if already used (Safe Links scanner already hit it)
-    const alreadyUsed = await redis.get(`used:${token}`);
-    
-    if (!alreadyUsed) {
-      // First visit — likely the scanner. Mark as used but don't create session yet.
-      await redis.set(`used:${token}`, '1', { ex: 300 });
-    }
-
-    // Always create a session — scanner won't store cookies so it won't matter
-    await redis.del(`token:${token}`);
+    // Don't delete the token — let it expire naturally after 15 min.
+    // This way Safe Links scanning it first doesn't break the real click.
     const sessionToken = crypto.randomBytes(32).toString('hex');
     await redis.set(`session:${sessionToken}`, email, { ex: 60 * 60 * 24 * 90 });
 
