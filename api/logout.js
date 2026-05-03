@@ -1,6 +1,8 @@
 // /api/logout.js
 import { Redis } from '@upstash/redis';
 
+const redis = Redis.fromEnv();
+
 function parseCookies(header = '') {
   const out = {};
   header.split(';').forEach(part => {
@@ -12,11 +14,6 @@ function parseCookies(header = '') {
 
 export default async function handler(req, res) {
   try {
-    const redis = new Redis({
-      url: process.env.KV_REST_API_URL,
-      token: process.env.KV_REST_API_TOKEN,
-    });
-
     const cookies = parseCookies(req.headers.cookie || '');
     const sessionToken = cookies.pdfly_session;
     if (sessionToken) {
