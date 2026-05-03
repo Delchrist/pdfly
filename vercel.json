@@ -1,6 +1,13 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/api/stripe-webhook", "destination": "/api/stripe-webhook.js" },
+    { "source": "/api/send-magic-link", "destination": "/api/send-magic-link.js" },
+    { "source": "/api/verify-magic-link", "destination": "/api/verify-magic-link.js" },
+    { "source": "/api/me", "destination": "/api/me.js" },
+    { "source": "/api/logout", "destination": "/api/logout.js" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
