@@ -8,13 +8,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize Redis inside the handler to ensure env vars are loaded
     const redis = new Redis({
       url: process.env.KV_REST_API_URL,
       token: process.env.KV_REST_API_TOKEN,
     });
 
-    // Parse body
     let body = req.body;
     if (typeof body === 'string') {
       try { body = JSON.parse(body); } catch { body = {}; }
@@ -26,7 +24,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    // Verify env vars
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.FROM_EMAIL;
     if (!apiKey) {
@@ -36,24 +33,18 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Email service not configured (FROM_EMAIL missing).' });
     }
 
-    // Rate limit
     const rateKey = `rate:${email}`;
     const recent = await redis.get(rateKey);
     if (recent) {
       return res.status(429).json({ error: 'Please wait a moment before requesting another link.' });
     }
 
-    // Generate token
     const token = crypto.randomBytes(32).toString('hex');
     await redis.set(`token:${token}`, email, { ex: 900 });
     await redis.set(rateKey, '1', { ex: 60 });
 
-    // Build magic link
-    const proto = req.headers['x-forwarded-proto'] || 'https';
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const magicLink = `${proto}://${host}/api/verify-magic-link?token=${token}`;
+    const magicLink = `https://pdfly.lol/api/verify-magic-link?token=${token}`;
 
-    // Send via Resend
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
