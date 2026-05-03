@@ -442,7 +442,7 @@ h1.hero-title .accent { font-style: italic; font-weight: 400; background: linear
       <p class="section-sub">Start free, upgrade when you need more. No hidden fees, cancel anytime.</p>
       <div class="billing-toggle" id="billingToggle">
         <button data-billing="monthly" class="active">Monthly</button>
-        <button data-billing="yearly">Yearly <span class="save">save 17%</span></button>
+        <button data-billing="yearly">Yearly <span class="save">save 44%</span></button>
       </div>
     </div>
 
@@ -472,7 +472,7 @@ h1.hero-title .accent { font-style: italic; font-weight: 400; background: linear
         <div class="plan-tagline">Unlock every tool, no limits.</div>
         <div class="plan-price">
           <span class="currency">$</span>
-          <span class="amount" id="planAmount">3</span>
+          <span class="amount" id="planAmount">1.50</span>
           <span class="period" id="planPeriod">/month</span>
         </div>
         <div class="plan-price-note" id="planNote">Billed monthly. Cancel anytime.</div>
@@ -779,11 +779,11 @@ document.querySelectorAll('#billingToggle button').forEach(b => {
     b.classList.add('active');
     const billing = b.dataset.billing;
     if (billing === 'yearly') {
-      document.getElementById('planAmount').textContent = '29.99';
+      document.getElementById('planAmount').textContent = '10';
       document.getElementById('planPeriod').textContent = '/year';
-      document.getElementById('planNote').textContent = 'Billed annually. Save 17%.';
+      document.getElementById('planNote').textContent = 'Billed annually. Save 44%.';
     } else {
-      document.getElementById('planAmount').textContent = '3';
+      document.getElementById('planAmount').textContent = '1.50';
       document.getElementById('planPeriod').textContent = '/month';
       document.getElementById('planNote').textContent = 'Billed monthly. Cancel anytime.';
     }
