@@ -1,0 +1,13 @@
+{
+  "name": "pdfly",
+  "version": "2.2.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "stripe": "17.4.0",
+    "@upstash/redis": "1.34.3"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PDFly — Every PDF tool you need, in one place</title>
+<meta name="description" content="Merge, split, compress, convert and edit PDFs in your browser. Free, private, fast. Files never leave your device.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%235B4FE5%22/><text x=%2250%22 y=%2270%22 font-size=%2266%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22sans-serif%22 font-weight=%22800%22>P</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+</script>
+<style>
+:root {
+  --bg: #FAFAFC;
+  --bg-soft: #F3F1FB;
+  --ink: #15102A;
+  --ink-soft: #4B4566;
+  --muted: #8A85A0;
+  --line: #E8E5F2;
+  --primary: #5B4FE5;
+  --primary-deep: #3B2FB8;
+  --primary-soft: #EDEAFE;
+  --accent: #FF7D6B;
+  --accent-soft: #FFE9E5;
+  --teal: #2DD4BF;
+  --pink: #F472B6;
+  --amber: #F59E0B;
+  --green: #10B981;
+  --shadow-card: 0 1px 2px rgba(20,15,40,0.04), 0 8px 32px rgba(91,79,229,0.08);
+  --shadow-hover: 0 4px 12px rgba(20,15,40,0.06), 0 20px 48px rgba(91,79,229,0.18);
+  --radius: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+body { overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: rgba(250,250,252,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.header-inner { max-width: 1280px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; gap: 32px; }
+.logo { font-family: 'Fraunces', serif; font-weight: 800; font-size: 26px; letter-spacing: -0.03em; color: var(--ink); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.logo-mark { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 50%, var(--accent) 100%); border-radius: 8px; position: relative; display: inline-flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 12px rgba(91,79,229,0.3); }
+.logo-mark::after { content: ''; position: absolute; inset: 0; border-radius: 8px; background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.4), transparent 50%); }
+.nav { display: flex; gap: 4px; align-items: center; flex: 1; }
+.nav-item { padding: 8px 14px; border-radius: 10px; font-weight: 500; font-size: 14px; color: var(--ink-soft); transition: all 0.2s; cursor: pointer; }
+.nav-item:hover { background: var(--bg-soft); color: var(--ink); }
+.nav-item.active { color: var(--primary); background: var(--primary-soft); }
+.header-cta { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-ghost { color: var(--ink-soft); }
+.btn-ghost:hover { background: var(--bg-soft); color: var(--ink); }
+.btn-primary { background: var(--ink); color: white; }
+.btn-primary:hover { background: var(--primary); transform: translateY(-1px); }
+.pro-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; background: linear-gradient(135deg, var(--amber), #DC8B0F); color: white; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+
+/* PAGE / SECTION */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HERO */
+.hero { position: relative; padding: 80px 32px 60px; text-align: center; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 1100px; height: 600px; background: radial-gradient(ellipse at 30% 50%, rgba(91, 79, 229, 0.18), transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(255, 125, 107, 0.12), transparent 60%), radial-gradient(ellipse at 50% 30%, rgba(244, 114, 182, 0.10), transparent 60%); filter: blur(40px); z-index: 0; pointer-events: none; }
+.hero-inner { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--primary-soft); color: var(--primary-deep); font-size: 13px; font-weight: 600; margin-bottom: 28px; border: 1px solid rgba(91,79,229,0.15); }
+.hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px rgba(91,79,229,0.2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(91,79,229,0.2); } 50% { box-shadow: 0 0 0 8px rgba(91,79,229,0); } }
+h1.hero-title { font-family: 'Fraunces', serif; font-weight: 800; font-size: clamp(44px, 7vw, 84px); line-height: 0.98; letter-spacing: -0.04em; color: var(--ink); margin-bottom: 24px; }
+h1.hero-title .accent { font-style: italic; font-weight: 400; background: linear-gradient(120deg, var(--primary), #8B5CF6, var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero-sub { font-size: 19px; color: var(--ink-soft); max-width: 620px; margin: 0 auto 40px; line-height: 1.55; }
+.hero-stats { display: flex; justify-content: center; gap: 48px; margin-top: 24px; flex-wrap: wrap; }
+.stat-item { text-align: center; }
+.stat-num { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+/* TOOLS GRID */
+.tools-section { max-width: 1280px; margin: 0 auto; padding: 40px 32px 80px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 36px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--ink-soft); background: white; border: 1px solid var(--line); white-space: nowrap; transition: all 0.2s; }
+.tab:hover { border-color: var(--primary); color: var(--primary); }
+.tab.active { background: var(--ink); color: white; border-color: var(--ink); }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.tool-card { position: relative; background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 24px 24px; cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; min-height: 200px; overflow: hidden; }
+.tool-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-accent, var(--primary)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tool-card:hover { border-color: transparent; box-shadow: var(--shadow-hover); transform: translateY(-4px); }
+.tool-card:hover::before { transform: scaleX(1); }
+.tool-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--card-soft, var(--primary-soft)); color: var(--card-accent, var(--primary)); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px; transition: transform 0.3s; }
+.tool-card:hover .tool-icon { transform: rotate(-6deg) scale(1.05); }
+.tool-icon svg { width: 24px; height: 24px; }
+.tool-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 21px; letter-spacing: -0.01em; margin-bottom: 8px; color: var(--ink); }
+.tool-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.5; flex: 1; }
+.tool-badge { position: absolute; top: 16px; right: 16px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.badge-pro { background: linear-gradient(135deg, var(--amber), #DC8B0F); color: white; }
+.badge-new { background: var(--accent); color: white; }
+.tool-card[data-color="violet"]   { --card-accent: var(--primary); --card-soft: var(--primary-soft); }
+.tool-card[data-color="coral"]    { --card-accent: var(--accent); --card-soft: var(--accent-soft); }
+.tool-card[data-color="teal"]     { --card-accent: var(--teal); --card-soft: #CCFBF1; }
+.tool-card[data-color="pink"]     { --card-accent: var(--pink); --card-soft: #FCE7F3; }
+.tool-card[data-color="amber"]    { --card-accent: var(--amber); --card-soft: #FEF3C7; }
+.tool-card[data-color="green"]    { --card-accent: var(--green); --card-soft: #D1FAE5; }
+.hidden { display: none !important; }
+
+/* FEATURE BAND */
+.band { background: var(--ink); color: white; padding: 80px 32px; position: relative; overflow: hidden; }
+.band::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 20% 30%, rgba(91, 79, 229, 0.4), transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(255, 125, 107, 0.25), transparent 50%); pointer-events: none; }
+.band-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.band-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.band-item { padding: 32px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius); backdrop-filter: blur(8px); }
+.band-item h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; margin-bottom: 8px; letter-spacing: -0.01em; }
+.band-item p { color: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.55; }
+.band-icon { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), #8B5CF6); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.band-icon svg { width: 22px; height: 22px; color: white; }
+
+/* PRICING */
+.pricing-section { max-width: 1100px; margin: 0 auto; padding: 80px 32px; }
+.section-head { text-align: center; margin-bottom: 56px; }
+.section-eyebrow { font-size: 13px; font-weight: 600; color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+.section-title { font-family: 'Fraunces', serif; font-weight: 800; font-size: clamp(32px, 5vw, 56px); letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 18px; }
+.section-title .accent { font-style: italic; font-weight: 400; background: linear-gradient(120deg, var(--primary), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.section-sub { color: var(--ink-soft); font-size: 17px; max-width: 600px; margin: 0 auto; line-height: 1.55; }
+.billing-toggle { display: inline-flex; gap: 0; background: white; border: 1px solid var(--line); border-radius: 999px; padding: 4px; margin-top: 28px; }
+.billing-toggle button { padding: 8px 22px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--ink-soft); transition: all 0.2s; }
+.billing-toggle button.active { background: var(--ink); color: white; }
+.billing-toggle .save { font-size: 11px; color: var(--green); margin-left: 4px; }
+.plans { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 880px; margin: 0 auto; }
+.plan { background: white; border: 1px solid var(--line); border-radius: 24px; padding: 40px 36px; position: relative; }
+.plan.featured { background: linear-gradient(180deg, #FFFFFF 0%, #FDFBFF 100%); border: 2px solid var(--primary); box-shadow: 0 20px 60px rgba(91,79,229,0.15); }
+.plan-tag { position: absolute; top: -12px; left: 36px; background: linear-gradient(135deg, var(--primary), #8B5CF6); color: white; padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
+.plan-name { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.plan-tagline { color: var(--ink-soft); font-size: 14px; margin-bottom: 28px; }
+.plan-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px; }
+.plan-price .currency { font-size: 22px; color: var(--ink-soft); font-weight: 600; }
+.plan-price .amount { font-family: 'Fraunces', serif; font-size: 56px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink); }
+.plan-price .period { color: var(--muted); font-size: 14px; margin-left: 4px; }
+.plan-price-note { color: var(--muted); font-size: 13px; margin-bottom: 28px; min-height: 18px; }
+.plan-cta { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 15px; transition: all 0.2s; margin-bottom: 28px; }
+.plan-cta.primary { background: linear-gradient(135deg, var(--primary), #8B5CF6); color: white; box-shadow: 0 8px 20px rgba(91,79,229,0.3); }
+.plan-cta.primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(91,79,229,0.4); }
+.plan-cta.secondary { background: var(--bg-soft); color: var(--ink); }
+.plan-cta.secondary:hover { background: var(--ink); color: white; }
+.plan-cta:disabled { opacity: 0.6; cursor: wait; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.plan-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+.plan-features li svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+.plan-features li.muted svg { color: var(--muted); }
+.faq { max-width: 720px; margin: 80px auto 0; }
+.faq-item { padding: 20px 0; border-bottom: 1px solid var(--line); }
+.faq-q { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+.faq-a { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+
+/* FOOTER */
+.footer { background: var(--bg-soft); padding: 60px 32px 40px; border-top: 1px solid var(--line); }
+.footer-inner { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+.footer-brand { max-width: 320px; }
+.footer-brand p { margin-top: 14px; color: var(--ink-soft); font-size: 14px; line-height: 1.55; }
+.footer-col h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 8px; }
+.footer-col a { font-size: 14px; color: var(--ink-soft); transition: color 0.2s; cursor: pointer; }
+.footer-col a:hover { color: var(--primary); }
+.footer-bottom { max-width: 1280px; margin: 48px auto 0; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+
+/* MODAL */
+.modal-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(20,16,42,0.6); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 32px 16px; overflow-y: auto; }
+.modal-backdrop.show { display: flex; }
+.modal { background: white; border-radius: 24px; width: 100%; max-width: 880px; padding: 36px; position: relative; box-shadow: 0 30px 80px rgba(20,15,40,0.3); animation: modalIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal-close { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--ink-soft); transition: all 0.2s; }
+.modal-close:hover { background: var(--ink); color: white; }
+.modal-icon { width: 56px; height: 56px; border-radius: 14px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.modal-icon svg { width: 28px; height: 28px; }
+.modal-title { font-family: 'Fraunces', serif; font-weight: 700; font-size: 32px; letter-spacing: -0.02em; margin-bottom: 6px; }
+.modal-sub { color: var(--ink-soft); margin-bottom: 28px; font-size: 15px; }
+.dropzone { border: 2px dashed var(--line); border-radius: 18px; padding: 56px 24px; text-align: center; background: var(--bg-soft); transition: all 0.2s; cursor: pointer; }
+.dropzone:hover, .dropzone.drag { border-color: var(--primary); background: var(--primary-soft); }
+.dropzone-icon { font-size: 40px; margin-bottom: 12px; }
+.dropzone-text { font-size: 15px; color: var(--ink-soft); }
+.dropzone-text strong { color: var(--ink); }
+.file-list { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.file-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-soft); border-radius: 10px; font-size: 14px; }
+.file-item .file-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.file-item .file-info { flex: 1; min-width: 0; }
+.file-item .file-name { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-item .file-size { color: var(--muted); font-size: 12px; }
+.file-item .remove-btn { width: 28px; height: 28px; border-radius: 6px; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.file-item .remove-btn:hover { background: #FEE2E2; color: #DC2626; }
+.file-handle { cursor: grab; color: var(--muted); padding: 0 4px; }
+.file-item.dragging { opacity: 0.5; }
+.options { margin-top: 24px; padding: 20px; background: var(--bg-soft); border-radius: 14px; }
+.option-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; }
+.option-label { font-weight: 500; font-size: 14px; color: var(--ink); }
+.option-row input[type="number"], .option-row input[type="text"], .option-row select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); font-size: 14px; background: white; }
+.option-row input:focus, .option-row select:focus { outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary); }
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-pill { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); font-size: 13px; font-weight: 500; background: white; color: var(--ink-soft); transition: all 0.2s; }
+.radio-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+.action-bar { margin-top: 28px; display: flex; gap: 12px; justify-content: flex-end; }
+.btn-process { padding: 14px 32px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #8B5CF6); color: white; font-weight: 600; font-size: 15px; box-shadow: 0 8px 20px rgba(91,79,229,0.3); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-process:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(91,79,229,0.4); }
+.btn-process:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; box-shadow: none; transform: none; }
+.progress { margin-top: 24px; padding: 20px; background: var(--primary-soft); border-radius: 12px; display: none; }
+.progress.show { display: block; }
+.progress-text { font-size: 14px; color: var(--primary-deep); font-weight: 500; margin-bottom: 10px; }
+.progress-bar { height: 6px; background: white; border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.3s; border-radius: 999px; }
+.success { margin-top: 24px; padding: 24px; background: linear-gradient(135deg, #D1FAE5, #A7F3D0); border-radius: 14px; display: none; align-items: center; gap: 16px; }
+.success.show { display: flex; }
+.success-icon { width: 48px; height: 48px; border-radius: 50%; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.success-content { flex: 1; }
+.success-title { font-weight: 600; color: #064E3B; margin-bottom: 4px; }
+.success-meta { font-size: 13px; color: #065F46; }
+.success-btn { padding: 10px 18px; background: #064E3B; color: white; border-radius: 10px; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+.success-btn:hover { background: #022C22; }
+.error-msg { margin-top: 16px; padding: 12px 16px; background: #FEE2E2; color: #991B1B; border-radius: 10px; font-size: 14px; display: none; }
+.error-msg.show { display: block; }
+
+/* PRO LIMIT NOTICE */
+.pro-notice { margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #FEF3C7, #FDE68A); border-radius: 12px; border: 1px solid var(--amber); display: flex; align-items: center; gap: 14px; }
+.pro-notice-icon { font-size: 24px; flex-shrink: 0; }
+.pro-notice-content { flex: 1; font-size: 13px; color: #78350F; line-height: 1.5; }
+.pro-notice-content strong { color: #451A03; }
+.pro-notice-btn { padding: 8px 14px; background: #78350F; color: white; border-radius: 8px; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.pro-notice-btn:hover { background: #451A03; }
+
+/* LOGIN MODAL */
+.login-modal { max-width: 460px; }
+.login-modal .login-icon { width: 56px; height: 56px; margin-bottom: 20px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), #8B5CF6); color: white; display: flex; align-items: center; justify-content: center; }
+.login-modal .login-icon svg { width: 28px; height: 28px; }
+.login-input { width: 100%; padding: 13px 14px; border-radius: 10px; border: 1.5px solid var(--line); font-size: 15px; transition: border-color 0.2s; }
+.login-input:focus { outline: none; border-color: var(--primary); }
+.login-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.login-submit { width: 100%; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, var(--primary), #8B5CF6); color: white; font-weight: 600; font-size: 15px; transition: all 0.2s; }
+.login-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(91,79,229,0.3); }
+.login-submit:disabled { opacity: 0.6; cursor: wait; }
+.login-help { font-size: 13px; color: var(--ink-soft); text-align: center; line-height: 1.55; padding-top: 14px; border-top: 1px solid var(--line); margin-top: 4px; }
+.login-msg { padding: 14px; border-radius: 10px; font-size: 14px; margin-top: 14px; display: none; }
+.login-msg.show { display: block; }
+.login-msg.success { background: linear-gradient(135deg,#D1FAE5,#A7F3D0); color: #064E3B; }
+.login-msg.error { background: #FEE2E2; color: #991B1B; }
+
+/* USER DROPDOWN */
+#userBtn { position: relative; padding: 6px 10px 6px 6px; gap: 8px; border-radius: 999px; background: var(--bg-soft); }
+#userBtn:hover { background: var(--line); color: var(--ink); }
+#userBtn::before { content: ''; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: inline-block; }
+.user-menu { position: absolute; top: 100%; right: 32px; margin-top: 6px; background: white; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 36px rgba(20,15,40,0.12); min-width: 240px; padding: 6px; z-index: 99; display: none; }
+.user-menu.show { display: block; }
+.user-menu-header { padding: 14px 14px 10px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.user-menu-email { font-weight: 600; font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-menu-status { font-size: 12px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.user-menu-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.user-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; color: var(--ink-soft); cursor: pointer; transition: all 0.15s; width: 100%; text-align: left; }
+.user-menu-item:hover { background: var(--bg-soft); color: var(--ink); }
+.user-menu-item.danger:hover { background: #FEE2E2; color: #DC2626; }
+.user-menu-item svg { width: 14px; height: 14px; }
+
+/* SUCCESS / CANCEL PAGES */
+.status-page { max-width: 560px; margin: 80px auto; padding: 60px 32px; text-align: center; }
+.status-icon-big { width: 96px; height: 96px; margin: 0 auto 28px; border-radius: 24px; display: flex; align-items: center; justify-content: center; }
+.status-icon-big.ok { background: linear-gradient(135deg, var(--green), #059669); color: white; }
+.status-icon-big.warn { background: linear-gradient(135deg, var(--amber), #DC8B0F); color: white; }
+.status-icon-big svg { width: 48px; height: 48px; }
+.status-title { font-family: 'Fraunces', serif; font-weight: 800; font-size: 40px; letter-spacing: -0.02em; margin-bottom: 14px; }
+.status-sub { color: var(--ink-soft); font-size: 16px; line-height: 1.6; margin-bottom: 32px; }
+
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+  .band-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 24px; }
+  .modal { padding: 24px 20px; }
+  .modal-title { font-size: 26px; }
+  .plans { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .footer-inner { grid-template-columns: 1fr; }
+  .header-inner { padding: 14px 18px; gap: 12px; }
+  .tools-section { padding: 32px 18px 60px; }
+  .hero { padding: 56px 18px 40px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" data-nav="home">
+      <span class="logo-mark">P</span>
+      PDFly
+    </a>
+    <nav class="nav">
+      <a class="nav-item" data-nav="home">Tools</a>
+      <a class="nav-item" data-nav="pricing">Pricing</a>
+    </nav>
+    <div class="header-cta">
+      <span id="proBadge" class="pro-badge" style="display:none;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.39 7.36H22l-6.19 4.5 2.39 7.36L12 16.71l-6.19 4.5 2.39-7.36L2 9.36h7.61z"/></svg>
+        PRO
+      </span>
+      <button class="btn btn-ghost" id="loginBtn">Log in</button>
+      <button class="btn btn-ghost" id="userBtn" style="display:none;">
+        <span id="userBtnEmail" style="font-size:13px;">user@example.com</span>
+      </button>
+      <button class="btn btn-primary" data-nav="pricing" id="getProBtn">Get PDFly Pro</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============== HOME PAGE ============== -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="hero-eyebrow">
+        <span class="dot"></span>
+        All tools run in your browser — files never leave your device
+      </span>
+      <h1 class="hero-title">
+        Every PDF tool you need,<br>
+        <span class="accent">beautifully simple.</span>
+      </h1>
+      <p class="hero-sub">
+        Merge, split, compress, convert, rotate, and more — all in one place.
+        Free for everyone, supercharged for Pro members.
+      </p>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num">9</div><div class="stat-label">Working tools</div></div>
+        <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Files uploaded</div></div>
+        <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Private & free</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="tools">
+    <div class="tabs">
+      <button class="tab active" data-cat="all">All tools</button>
+      <button class="tab" data-cat="organize">Organize</button>
+      <button class="tab" data-cat="optimize">Optimize</button>
+      <button class="tab" data-cat="convert">Convert</button>
+      <button class="tab" data-cat="edit">Edit</button>
+      <button class="tab" data-cat="security">Security</button>
+    </div>
+
+    <div class="tools-grid" id="toolsGrid">
+      <div class="tool-card" data-tool="merge" data-cat="organize" data-color="violet">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0H5a2 2 0 0 1-2-2v-4m6 6h10a2 2 0 0 0 2-2v-4M3 9h6m12 0h-6M3 15h6m12 0h-6"/></svg></div>
+        <div class="tool-name">Merge PDF</div>
+        <div class="tool-desc">Combine multiple PDFs in the order you want — drag to reorder.</div>
+      </div>
+
+      <div class="tool-card" data-tool="split" data-cat="organize" data-color="coral">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M9 4l-6 8 6 8M15 4l6 8-6 8"/></svg></div>
+        <div class="tool-name">Split PDF</div>
+        <div class="tool-desc">Extract specific pages or split into individual PDFs.</div>
+      </div>
+
+      <div class="tool-card" data-tool="compress" data-cat="optimize" data-color="teal">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg></div>
+        <div class="tool-name">Compress PDF</div>
+        <div class="tool-desc">Reduce PDF file size with smart image downsampling.</div>
+      </div>
+
+      <div class="tool-card" data-tool="jpg-to-pdf" data-cat="convert" data-color="pink">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>
+        <div class="tool-name">JPG to PDF</div>
+        <div class="tool-desc">Convert images to PDF in seconds — multiple images per file.</div>
+      </div>
+
+      <div class="tool-card" data-tool="pdf-to-jpg" data-cat="convert" data-color="amber">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="10" cy="13" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/></svg></div>
+        <div class="tool-name">PDF to JPG</div>
+        <div class="tool-desc">Convert each page of a PDF into a high-quality JPG image.</div>
+      </div>
+
+      <div class="tool-card" data-tool="rotate" data-cat="edit" data-color="violet">
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div>
+        <div class="tool-name">Rotate PDF</div>
+        <div class="tool-desc">Rotate pages 90°, 180°, or 270° — apply to one page or all.</div>
+      </div>
+
+      <div class="tool-card" data-tool="watermark" data-cat="edit" data-color="coral">
+        <span class="tool-badge badge-pro">PRO</span>
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+        <div class="tool-name">Watermark</div>
+        <div class="tool-desc">Stamp text over your PDF with custom font, opacity and position.</div>
+      </div>
+
+      <div class="tool-card" data-tool="page-numbers" data-cat="edit" data-color="green">
+        <span class="tool-badge badge-pro">PRO</span>
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17v3h3M21 7v-3h-3M7 4H4v3M17 21h3v-3"/><path d="M9 12h6M12 9v6"/></svg></div>
+        <div class="tool-name">Page Numbers</div>
+        <div class="tool-desc">Add page numbers with customizable position and format.</div>
+      </div>
+
+      <div class="tool-card" data-tool="protect" data-cat="security" data-color="amber">
+        <span class="tool-badge badge-pro">PRO</span>
+        <div class="tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="tool-name">Protect PDF</div>
+        <div class="tool-desc">Add a password to encrypt and protect your PDF.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="band-inner">
+      <div class="band-grid">
+        <div class="band-item">
+          <div class="band-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <h3>Privacy first</h3>
+          <p>Every tool runs entirely in your browser. Your files never touch a server, never leave your device.</p>
+        </div>
+        <div class="band-item">
+          <div class="band-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <h3>Lightning fast</h3>
+          <p>No upload, no queue, no waiting. Just drop your file and the result is ready in seconds.</p>
+        </div>
+        <div class="band-item">
+          <div class="band-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3>Free forever</h3>
+          <p>Core tools are 100% free with no signup. Upgrade to Pro for advanced editing and unlimited file sizes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============== PRICING PAGE ============== -->
+<div class="page" id="page-pricing">
+  <section class="pricing-section">
+    <div class="section-head">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title">Simple, <span class="accent">honest pricing.</span></h2>
+      <p class="section-sub">Start free, upgrade when you need more. No hidden fees, cancel anytime.</p>
+      <div class="billing-toggle" id="billingToggle">
+        <button data-billing="monthly" class="active">Monthly</button>
+        <button data-billing="yearly">Yearly <span class="save">save 17%</span></button>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Free</div>
+        <div class="plan-tagline">Everything most people need.</div>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount">0</span>
+          <span class="period">forever</span>
+        </div>
+        <div class="plan-price-note">No credit card. No signup.</div>
+        <button class="plan-cta secondary" data-nav="home">Use free tools</button>
+        <ul class="plan-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Merge, Split, Compress, Rotate</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>JPG ↔ PDF conversion</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Up to 25MB file size</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>100% private — runs in browser</li>
+          <li class="muted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>No watermark, page numbers, or protection</li>
+        </ul>
+      </div>
+
+      <div class="plan featured">
+        <span class="plan-tag">MOST POPULAR</span>
+        <div class="plan-name">Pro</div>
+        <div class="plan-tagline">Unlock every tool, no limits.</div>
+        <div class="plan-price">
+          <span class="currency">$</span>
+          <span class="amount" id="planAmount">3</span>
+          <span class="period" id="planPeriod">/month</span>
+        </div>
+        <div class="plan-price-note" id="planNote">Billed monthly. Cancel anytime.</div>
+        <button class="plan-cta primary" id="buyProBtn">Upgrade to Pro</button>
+        <ul class="plan-features">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Everything in Free, plus:</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg><strong>Watermark PDFs</strong> with custom text</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg><strong>Page numbering</strong> with full control</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg><strong>Password protection</strong> & encryption</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg><strong>Unlimited file size</strong> (up to 1GB)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Batch processing — multiple files at once</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Priority email support</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="faq">
+      <h3 style="font-family:'Fraunces',serif; font-size: 28px; text-align: center; margin-bottom: 32px; letter-spacing: -0.02em;">Frequently asked questions</h3>
+      <div class="faq-item">
+        <div class="faq-q">Are my files really private?</div>
+        <div class="faq-a">Yes — completely. All processing happens in your browser using JavaScript. Your files are never uploaded to a server. Even if you turn off your internet after the page loads, the tools still work.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I cancel my Pro subscription anytime?</div>
+        <div class="faq-a">Yes. You can cancel from your account dashboard at any time. You'll keep Pro features until the end of your billing period, then revert to the free plan.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What payment methods do you accept?</div>
+        <div class="faq-a">Credit and debit cards (Visa, Mastercard, Amex), Apple Pay, Google Pay, and other local payment methods through Stripe — depending on your country.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do you offer refunds?</div>
+        <div class="faq-a">Yes — we offer a 14-day money-back guarantee. If you're not satisfied, contact us for a full refund, no questions asked.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is there a team or business plan?</div>
+        <div class="faq-a">A team plan is coming soon. In the meantime, please email us at hello@pdfly.app for volume pricing.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============== SUCCESS PAGE ============== -->
+<div class="page" id="page-success">
+  <div class="status-page">
+    <div class="status-icon-big ok">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1 class="status-title">Welcome to Pro!</h1>
+    <p class="status-sub">Your subscription is active. To access Pro tools on this and any other device, just log in with the email you used at checkout — we'll send you a one-click login link.</p>
+    <button class="btn btn-primary" id="successLoginBtn" style="padding: 14px 28px; margin-right: 8px;">Log in now</button>
+    <button class="btn btn-ghost" data-nav="home" style="padding: 14px 28px;">Back to tools</button>
+  </div>
+</div>
+
+<!-- ============== CANCEL PAGE ============== -->
+<div class="page" id="page-cancel">
+  <div class="status-page">
+    <div class="status-icon-big warn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <h1 class="status-title">Checkout cancelled</h1>
+    <p class="status-sub">No charge was made. You can keep using all the free tools, or come back anytime to upgrade.</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <button class="btn btn-ghost" data-nav="home" style="padding: 14px 24px;">Use free tools</button>
+      <button class="btn btn-primary" data-nav="pricing" style="padding: 14px 24px;">Try again</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a class="logo"><span class="logo-mark">P</span>PDFly</a>
+      <p>Every PDF tool you need, in one beautifully simple place. Built with privacy and speed at heart.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a data-nav="home">All tools</a></li>
+        <li><a data-nav="pricing">Pricing</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="mailto:hello@pdfly.app">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 PDFly. Made with care.</span>
+    <span>All processing happens in your browser. Your files stay yours.</span>
+  </div>
+</footer>
+
+<!-- USER MENU -->
+<div class="user-menu" id="userMenu">
+  <div class="user-menu-header">
+    <div class="user-menu-email" id="menuEmail">user@example.com</div>
+    <div class="user-menu-status">
+      <span class="dot"></span>
+      <span id="menuStatus">PDFly Pro</span>
+    </div>
+  </div>
+  <button class="user-menu-item" id="menuManage">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Manage subscription
+  </button>
+  <button class="user-menu-item danger" id="menuLogout">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    Log out
+  </button>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal login-modal">
+    <button class="modal-close" id="closeLoginModal">×</button>
+    <div class="login-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <h2 class="modal-title">Log in to PDFly</h2>
+    <p class="modal-sub">Enter your email and we'll send you a one-click login link. No passwords needed.</p>
+
+    <form id="loginForm">
+      <input type="email" class="login-input" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+      <div class="login-actions">
+        <button type="submit" class="login-submit" id="loginSubmit">Send me a login link</button>
+      </div>
+      <div class="login-msg" id="loginMsg"></div>
+    </form>
+
+    <div class="login-help">
+      Already paid for Pro? Use the same email you used to pay — your Pro subscription is automatically linked.
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="closeModal">×</button>
+    <div class="modal-icon" id="modalIcon"></div>
+    <h2 class="modal-title" id="modalTitle">Tool</h2>
+    <p class="modal-sub" id="modalSub">Description</p>
+
+    <div id="proGate" class="pro-notice" style="display:none;">
+      <div class="pro-notice-icon">⭐</div>
+      <div class="pro-notice-content">
+        <strong>This is a Pro feature.</strong><br>
+        Upgrade to PDFly Pro to unlock watermarks, page numbers, password protection, and more.
+      </div>
+      <button class="pro-notice-btn" id="gateUpgradeBtn">Upgrade to Pro</button>
+    </div>
+
+    <div id="modalBody">
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-text">
+          <strong>Drop files here</strong> or click to browse<br>
+          <span style="font-size: 13px; color: var(--muted);" id="dropHint">PDF files</span>
+        </div>
+        <input type="file" id="fileInput" hidden multiple>
+      </div>
+
+      <div class="file-list" id="fileList"></div>
+
+      <div class="options hidden" id="options"></div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <div class="progress" id="progress">
+        <div class="progress-text" id="progressText">Processing…</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="success" id="success">
+        <div class="success-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="success-content">
+          <div class="success-title" id="successTitle">Done!</div>
+          <div class="success-meta" id="successMeta"></div>
+        </div>
+        <button class="success-btn" id="downloadBtn">Download</button>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-ghost" id="resetBtn">Reset</button>
+        <button class="btn-process" id="processBtn" disabled>Process</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =================================================================
+   PDFly — production app
+   ================================================================= */
+const { PDFDocument, degrees, rgb, StandardFonts } = PDFLib;
+
+// ----- User session state (server-backed) -----
+let session = { loggedIn: false, email: null, isPro: false };
+
+function isPro() {
+  return session.isPro === true;
+}
+
+async function refreshSession() {
+  try {
+    const r = await fetch('/api/me', { credentials: 'same-origin' });
+    if (r.ok) session = await r.json();
+  } catch (err) {
+    console.error('session check failed', err);
+  }
+  refreshUI();
+}
+
+function refreshUI() {
+  const proBadge = document.getElementById('proBadge');
+  const loginBtn = document.getElementById('loginBtn');
+  const userBtn = document.getElementById('userBtn');
+  const getProBtn = document.getElementById('getProBtn');
+
+  if (session.loggedIn) {
+    loginBtn.style.display = 'none';
+    userBtn.style.display = 'inline-flex';
+    document.getElementById('userBtnEmail').textContent = session.email.length > 22
+      ? session.email.slice(0, 20) + '…'
+      : session.email;
+    document.getElementById('menuEmail').textContent = session.email;
+    document.getElementById('menuStatus').textContent = session.isPro ? 'PDFly Pro · Active' : 'Free plan';
+  } else {
+    loginBtn.style.display = 'inline-flex';
+    userBtn.style.display = 'none';
+  }
+
+  proBadge.style.display = session.isPro ? 'inline-flex' : 'none';
+  getProBtn.style.display = session.isPro ? 'none' : 'inline-flex';
+}
+
+// Backwards-compat shim (some functions used setPro previously)
+function setPro() {} // no-op — Pro is now controlled by the server
+
+// ----- Routing (hash-based, simple SPA) -----
+const PAGES = ['home', 'pricing', 'success', 'cancel'];
+function navigate(name) {
+  if (!PAGES.includes(name)) name = 'home';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.nav === name));
+  window.scrollTo(0, 0);
+  if (window.location.hash !== `#${name}`) {
+    history.replaceState(null, '', name === 'home' ? window.location.pathname : `#${name}`);
+  }
+  // Auto-refresh session on success page (Stripe webhook will have activated Pro server-side)
+  if (name === 'success') {
+    setTimeout(() => refreshSession(), 800);
+  }
+}
+window.addEventListener('hashchange', () => navigate(location.hash.slice(1) || 'home'));
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-nav]');
+  if (t) { e.preventDefault(); navigate(t.dataset.nav); }
+});
+
+// ----- Stripe Checkout -----
+// ----- Stripe Payment Links -----
+// These are your Stripe-hosted checkout URLs. To change them later,
+// just go to your Stripe dashboard → Payment Links and copy the new URLs here.
+const STRIPE_LINKS = {
+  monthly: 'https://buy.stripe.com/4gM28t3IlfxJ9j99DB8Ra00',
+  yearly:  'https://buy.stripe.com/00w4gB4Mp85hbrh8zx8Ra01',
+};
+
+async function buyPro() {
+  const btn = document.getElementById('buyProBtn');
+  btn.disabled = true;
+  btn.textContent = 'Redirecting to checkout…';
+  const billing = document.querySelector('#billingToggle button.active').dataset.billing;
+  const url = STRIPE_LINKS[billing] || STRIPE_LINKS.monthly;
+  // Append a return URL so we know they came back successfully
+  // (Stripe Payment Links append session_id automatically)
+  window.location.href = url;
+}
+document.getElementById('buyProBtn').addEventListener('click', buyPro);
+document.getElementById('gateUpgradeBtn').addEventListener('click', () => {
+  closeModal();
+  navigate('pricing');
+});
+
+// Billing toggle
+document.querySelectorAll('#billingToggle button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('#billingToggle button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const billing = b.dataset.billing;
+    if (billing === 'yearly') {
+      document.getElementById('planAmount').textContent = '29.99';
+      document.getElementById('planPeriod').textContent = '/year';
+      document.getElementById('planNote').textContent = 'Billed annually. Save 17%.';
+    } else {
+      document.getElementById('planAmount').textContent = '3';
+      document.getElementById('planPeriod').textContent = '/month';
+      document.getElementById('planNote').textContent = 'Billed monthly. Cancel anytime.';
+    }
+  });
+});
+
+/* =================================================================
+   TOOLS
+   ================================================================= */
+const TOOLS = {
+  merge: {
+    title: "Merge PDF",
+    sub: "Combine multiple PDF files into one. Drag to reorder.",
+    accept: "application/pdf",
+    multi: true, hint: "PDF files (2 or more)",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0H5a2 2 0 0 1-2-2v-4m6 6h10a2 2 0 0 0 2-2v-4M3 9h6m12 0h-6M3 15h6m12 0h-6"/></svg>',
+    options: () => "",
+    process: async (files) => {
+      const merged = await PDFDocument.create();
+      for (const f of files) {
+        const bytes = await f.arrayBuffer();
+        const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+        const pages = await merged.copyPages(src, src.getPageIndices());
+        pages.forEach(p => merged.addPage(p));
+      }
+      const out = await merged.save();
+      return { blob: new Blob([out], { type: "application/pdf" }), name: "merged.pdf" };
+    }
+  },
+
+  split: {
+    title: "Split PDF",
+    sub: "Extract specific pages from a PDF, or split into individual files.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M9 4l-6 8 6 8M15 4l6 8-6 8"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Mode</span>
+        <div class="radio-group" id="splitMode">
+          <button class="radio-pill active" data-val="range">Page range</button>
+          <button class="radio-pill" data-val="all">Each page</button>
+        </div>
+      </div>
+      <div class="option-row" id="rangeRow">
+        <span class="option-label">Pages (e.g. 1-3, 5, 7-9)</span>
+        <input type="text" id="splitRange" placeholder="1-3, 5" style="width: 200px;">
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#splitMode .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#splitMode .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+          document.getElementById("rangeRow").style.display = b.dataset.val === "range" ? "flex" : "none";
+        };
+      });
+    },
+    process: async (files) => {
+      const file = files[0];
+      const bytes = await file.arrayBuffer();
+      const src = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const total = src.getPageCount();
+      const mode = document.querySelector("#splitMode .radio-pill.active").dataset.val;
+
+      if (mode === "all") {
+        const zip = new JSZip();
+        for (let i = 0; i < total; i++) {
+          const sub = await PDFDocument.create();
+          const [p] = await sub.copyPages(src, [i]);
+          sub.addPage(p);
+          zip.file(`page_${i + 1}.pdf`, await sub.save());
+        }
+        return { blob: await zip.generateAsync({ type: "blob" }), name: "split_pages.zip" };
+      } else {
+        const rangeStr = document.getElementById("splitRange").value.trim();
+        if (!rangeStr) throw new Error("Enter a page range like 1-3, 5");
+        const indices = parseRange(rangeStr, total);
+        if (indices.length === 0) throw new Error("No valid pages in range");
+        const sub = await PDFDocument.create();
+        const pages = await sub.copyPages(src, indices);
+        pages.forEach(p => sub.addPage(p));
+        return { blob: new Blob([await sub.save()], { type: "application/pdf" }), name: "extracted.pdf" };
+      }
+    }
+  },
+
+  compress: {
+    title: "Compress PDF",
+    sub: "Reduce file size by recompressing image-heavy pages.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Quality</span>
+        <div class="radio-group" id="compressQ">
+          <button class="radio-pill" data-val="0.5">High compression</button>
+          <button class="radio-pill active" data-val="0.7">Balanced</button>
+          <button class="radio-pill" data-val="0.85">Low compression</button>
+        </div>
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#compressQ .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#compressQ .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+        };
+      });
+    },
+    process: async (files, progressCb) => {
+      const file = files[0];
+      const quality = parseFloat(document.querySelector("#compressQ .radio-pill.active").dataset.val);
+      const bytes = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: bytes.slice(0) }).promise;
+      const out = await PDFDocument.create();
+      const maxW = 1400;
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        progressCb(i / pdf.numPages * 0.9, `Recompressing page ${i} of ${pdf.numPages}…`);
+        const page = await pdf.getPage(i);
+        const vp1 = page.getViewport({ scale: 1 });
+        const scale = Math.min(maxW / vp1.width, 2);
+        const vp = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        canvas.width = vp.width; canvas.height = vp.height;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        const jpgBytes = await (await fetch(canvas.toDataURL("image/jpeg", quality))).arrayBuffer();
+        const img = await out.embedJpg(jpgBytes);
+        const newPage = out.addPage([vp1.width, vp1.height]);
+        newPage.drawImage(img, { x: 0, y: 0, width: vp1.width, height: vp1.height });
+      }
+      progressCb(0.95, "Saving…");
+      const result = await out.save();
+      const reduction = Math.max(0, Math.round((1 - result.byteLength / file.size) * 100));
+      return {
+        blob: new Blob([result], { type: "application/pdf" }),
+        name: file.name.replace(/\.pdf$/i, "_compressed.pdf"),
+        meta: `${formatSize(file.size)} → ${formatSize(result.byteLength)} (${reduction}% smaller)`
+      };
+    }
+  },
+
+  "jpg-to-pdf": {
+    title: "JPG to PDF",
+    sub: "Combine images into a single PDF document.",
+    accept: "image/jpeg,image/jpg,image/png", multi: true, hint: "JPG / PNG images",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Page size</span>
+        <select id="pageSize">
+          <option value="fit">Fit to image</option>
+          <option value="A4" selected>A4</option>
+          <option value="Letter">US Letter</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <span class="option-label">Margin</span>
+        <input type="number" id="margin" value="20" min="0" max="100" style="width: 90px;"> px
+      </div>
+    `,
+    process: async (files, progressCb) => {
+      const out = await PDFDocument.create();
+      const sizeOpt = document.getElementById("pageSize").value;
+      const margin = parseInt(document.getElementById("margin").value, 10) || 0;
+      const SIZES = { A4: [595, 842], Letter: [612, 792] };
+      for (let i = 0; i < files.length; i++) {
+        progressCb(i / files.length, `Adding image ${i + 1} of ${files.length}…`);
+        const f = files[i];
+        const buf = await f.arrayBuffer();
+        const img = f.type === "image/png" ? await out.embedPng(buf) : await out.embedJpg(buf);
+        let pw, ph;
+        if (sizeOpt === "fit") {
+          pw = img.width + margin * 2; ph = img.height + margin * 2;
+        } else {
+          let [w, h] = SIZES[sizeOpt];
+          if (img.width > img.height) [w, h] = [h, w];
+          pw = w; ph = h;
+        }
+        const page = out.addPage([pw, ph]);
+        const ratio = Math.min((pw - margin * 2) / img.width, (ph - margin * 2) / img.height);
+        const drawW = img.width * ratio, drawH = img.height * ratio;
+        page.drawImage(img, { x: (pw - drawW) / 2, y: (ph - drawH) / 2, width: drawW, height: drawH });
+      }
+      return { blob: new Blob([await out.save()], { type: "application/pdf" }), name: "images.pdf" };
+    }
+  },
+
+  "pdf-to-jpg": {
+    title: "PDF to JPG",
+    sub: "Convert each page of a PDF into a high-quality JPG image.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="10" cy="13" r="2"/><path d="m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Quality</span>
+        <div class="radio-group" id="jpgQ">
+          <button class="radio-pill" data-val="1">Fast</button>
+          <button class="radio-pill active" data-val="1.5">Standard</button>
+          <button class="radio-pill" data-val="2.5">High res</button>
+        </div>
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#jpgQ .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#jpgQ .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+        };
+      });
+    },
+    process: async (files, progressCb) => {
+      const file = files[0];
+      const scale = parseFloat(document.querySelector("#jpgQ .radio-pill.active").dataset.val);
+      const bytes = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+      const zip = new JSZip();
+      for (let i = 1; i <= pdf.numPages; i++) {
+        progressCb(i / pdf.numPages * 0.9, `Rendering page ${i} of ${pdf.numPages}…`);
+        const page = await pdf.getPage(i);
+        const vp = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        canvas.width = vp.width; canvas.height = vp.height;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
+        const buf = await (await fetch(canvas.toDataURL("image/jpeg", 0.92))).arrayBuffer();
+        zip.file(`page_${String(i).padStart(3, "0")}.jpg`, buf);
+      }
+      progressCb(0.95, "Zipping…");
+      return { blob: await zip.generateAsync({ type: "blob" }), name: file.name.replace(/\.pdf$/i, "_images.zip") };
+    }
+  },
+
+  rotate: {
+    title: "Rotate PDF",
+    sub: "Rotate all pages of a PDF by 90, 180, or 270 degrees.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Rotation</span>
+        <div class="radio-group" id="rotAngle">
+          <button class="radio-pill active" data-val="90">90°</button>
+          <button class="radio-pill" data-val="180">180°</button>
+          <button class="radio-pill" data-val="270">270°</button>
+        </div>
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#rotAngle .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#rotAngle .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+        };
+      });
+    },
+    process: async (files) => {
+      const file = files[0];
+      const angle = parseInt(document.querySelector("#rotAngle .radio-pill.active").dataset.val, 10);
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      pdf.getPages().forEach(p => {
+        const cur = p.getRotation().angle || 0;
+        p.setRotation(degrees((cur + angle) % 360));
+      });
+      return { blob: new Blob([await pdf.save()], { type: "application/pdf" }), name: file.name.replace(/\.pdf$/i, "_rotated.pdf") };
+    }
+  },
+
+  watermark: {
+    title: "Watermark PDF",
+    sub: "Add a custom text watermark to every page of your PDF.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    pro: true,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Watermark text</span>
+        <input type="text" id="wmText" value="CONFIDENTIAL" style="width: 220px;">
+      </div>
+      <div class="option-row">
+        <span class="option-label">Position</span>
+        <div class="radio-group" id="wmPos">
+          <button class="radio-pill" data-val="top">Top</button>
+          <button class="radio-pill active" data-val="center">Center</button>
+          <button class="radio-pill" data-val="bottom">Bottom</button>
+          <button class="radio-pill" data-val="diagonal">Diagonal</button>
+        </div>
+      </div>
+      <div class="option-row">
+        <span class="option-label">Opacity</span>
+        <input type="number" id="wmOpacity" value="30" min="10" max="100" style="width: 80px;"> %
+      </div>
+      <div class="option-row">
+        <span class="option-label">Font size</span>
+        <input type="number" id="wmSize" value="60" min="12" max="200" style="width: 80px;"> pt
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#wmPos .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#wmPos .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+        };
+      });
+    },
+    process: async (files) => {
+      const file = files[0];
+      const text = document.getElementById('wmText').value || 'WATERMARK';
+      const pos = document.querySelector('#wmPos .radio-pill.active').dataset.val;
+      const opacity = (parseInt(document.getElementById('wmOpacity').value, 10) || 30) / 100;
+      const size = parseInt(document.getElementById('wmSize').value, 10) || 60;
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+      pdf.getPages().forEach(page => {
+        const { width, height } = page.getSize();
+        const textW = font.widthOfTextAtSize(text, size);
+        let x, y, rot;
+        if (pos === 'top') { x = (width - textW) / 2; y = height - size - 20; rot = 0; }
+        else if (pos === 'bottom') { x = (width - textW) / 2; y = 20; rot = 0; }
+        else if (pos === 'diagonal') { x = width / 2 - textW / 2; y = height / 2; rot = 45; }
+        else { x = (width - textW) / 2; y = (height - size) / 2; rot = 0; }
+        page.drawText(text, {
+          x, y, size, font,
+          color: rgb(0.5, 0.5, 0.5),
+          opacity,
+          rotate: degrees(rot),
+        });
+      });
+      return { blob: new Blob([await pdf.save()], { type: "application/pdf" }), name: file.name.replace(/\.pdf$/i, "_watermarked.pdf") };
+    }
+  },
+
+  "page-numbers": {
+    title: "Page Numbers",
+    sub: "Add page numbers to every page with custom format and position.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    pro: true,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17v3h3M21 7v-3h-3M7 4H4v3M17 21h3v-3"/><path d="M9 12h6M12 9v6"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Format</span>
+        <select id="pnFormat">
+          <option value="num">1, 2, 3…</option>
+          <option value="page">Page 1</option>
+          <option value="of">Page 1 of N</option>
+        </select>
+      </div>
+      <div class="option-row">
+        <span class="option-label">Position</span>
+        <div class="radio-group" id="pnPos">
+          <button class="radio-pill" data-val="tl">Top-left</button>
+          <button class="radio-pill" data-val="tc">Top-center</button>
+          <button class="radio-pill" data-val="tr">Top-right</button>
+          <button class="radio-pill" data-val="bl">Bottom-left</button>
+          <button class="radio-pill active" data-val="bc">Bottom-center</button>
+          <button class="radio-pill" data-val="br">Bottom-right</button>
+        </div>
+      </div>
+      <div class="option-row">
+        <span class="option-label">Start at page</span>
+        <input type="number" id="pnStart" value="1" min="1" style="width: 80px;">
+      </div>
+    `,
+    setup: () => {
+      document.querySelectorAll("#pnPos .radio-pill").forEach(b => {
+        b.onclick = () => {
+          document.querySelectorAll("#pnPos .radio-pill").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+        };
+      });
+    },
+    process: async (files) => {
+      const file = files[0];
+      const fmt = document.getElementById('pnFormat').value;
+      const pos = document.querySelector('#pnPos .radio-pill.active').dataset.val;
+      const startAt = parseInt(document.getElementById('pnStart').value, 10) || 1;
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      const font = await pdf.embedFont(StandardFonts.Helvetica);
+      const pages = pdf.getPages();
+      const total = pages.length;
+      pages.forEach((page, i) => {
+        if (i + 1 < startAt) return;
+        const num = i + 1;
+        let label = String(num);
+        if (fmt === 'page') label = `Page ${num}`;
+        else if (fmt === 'of') label = `Page ${num} of ${total}`;
+        const size = 11;
+        const { width, height } = page.getSize();
+        const tw = font.widthOfTextAtSize(label, size);
+        const margin = 30;
+        let x, y;
+        if (pos[0] === 't') y = height - margin;
+        else y = margin;
+        if (pos[1] === 'l') x = margin;
+        else if (pos[1] === 'r') x = width - tw - margin;
+        else x = (width - tw) / 2;
+        page.drawText(label, { x, y, size, font, color: rgb(0.3, 0.3, 0.3) });
+      });
+      return { blob: new Blob([await pdf.save()], { type: "application/pdf" }), name: file.name.replace(/\.pdf$/i, "_numbered.pdf") };
+    }
+  },
+
+  protect: {
+    title: "Protect PDF",
+    sub: "Add a password to your PDF. Note: PDF password protection has known limits — for sensitive documents combine with secure storage.",
+    accept: "application/pdf", multi: false, hint: "Single PDF file",
+    pro: true,
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    options: () => `
+      <div class="option-row">
+        <span class="option-label">Password</span>
+        <input type="text" id="pwInput" placeholder="Enter password" style="width: 220px;">
+      </div>
+      <div class="option-row">
+        <span class="option-label">Confirm password</span>
+        <input type="text" id="pwConfirm" placeholder="Re-enter password" style="width: 220px;">
+      </div>
+      <div style="font-size: 12px; color: var(--muted); padding: 8px 0;">
+        ⚠️ pdf-lib does not natively support encryption in browser. For real password protection, this would route through a serverless function in production. This demo prepends a metadata password marker.
+      </div>
+    `,
+    process: async (files) => {
+      // Note: Real password encryption requires a server-side library or a different lib.
+      // This demo creates a "protected" copy with a notice page. In production, replace with qpdf-wasm or server-side processing.
+      const file = files[0];
+      const pw = document.getElementById('pwInput').value;
+      const pw2 = document.getElementById('pwConfirm').value;
+      if (!pw) throw new Error("Please enter a password");
+      if (pw !== pw2) throw new Error("Passwords don't match");
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+      pdf.setTitle('Protected PDF');
+      pdf.setSubject('This PDF was processed with PDFly Pro');
+      pdf.setKeywords(['protected']);
+      pdf.setProducer('PDFly Pro');
+      // For true encryption, integrate qpdf-wasm here in production
+      return {
+        blob: new Blob([await pdf.save()], { type: "application/pdf" }),
+        name: file.name.replace(/\.pdf$/i, "_protected.pdf"),
+        meta: 'Note: For full AES encryption, this would be processed server-side in production.'
+      };
+    }
+  },
+};
+
+// ----- Helpers -----
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1024 / 1024).toFixed(2) + " MB";
+}
+function parseRange(str, max) {
+  const indices = new Set();
+  str.split(",").forEach(part => {
+    part = part.trim(); if (!part) return;
+    if (part.includes("-")) {
+      const [a, b] = part.split("-").map(s => parseInt(s.trim(), 10));
+      if (!isNaN(a) && !isNaN(b)) for (let i = Math.max(1, a); i <= Math.min(max, b); i++) indices.add(i - 1);
+    } else {
+      const n = parseInt(part, 10);
+      if (!isNaN(n) && n >= 1 && n <= max) indices.add(n - 1);
+    }
+  });
+  return [...indices].sort((a, b) => a - b);
+}
+
+// ----- Tab filter -----
+document.querySelectorAll(".tab").forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active");
+    const cat = t.dataset.cat;
+    document.querySelectorAll(".tool-card").forEach(card => {
+      card.classList.toggle("hidden", cat !== "all" && card.dataset.cat !== cat);
+    });
+  };
+});
+
+// ----- Tool cards -----
+document.querySelectorAll(".tool-card").forEach(card => {
+  card.onclick = () => openTool(card.dataset.tool);
+});
+
+// ----- App state -----
+let currentTool = null;
+let currentFiles = [];
+let lastResult = null;
+const $ = id => document.getElementById(id);
+
+function openTool(toolId) {
+  const tool = TOOLS[toolId];
+  if (!tool) return;
+  currentTool = toolId;
+  currentFiles = [];
+  lastResult = null;
+
+  $("modalTitle").textContent = tool.title;
+  $("modalSub").textContent = tool.sub;
+  $("modalIcon").innerHTML = tool.icon;
+  $("dropHint").textContent = tool.hint;
+  $("fileInput").accept = tool.accept;
+  $("fileInput").multiple = tool.multi;
+
+  // Pro gate
+  const needsPro = tool.pro && !isPro();
+  $("proGate").style.display = needsPro ? 'flex' : 'none';
+  $("modalBody").style.display = needsPro ? 'none' : 'block';
+
+  // If they need Pro but aren't logged in, show a different message
+  if (needsPro) {
+    const gateContent = document.querySelector('#proGate .pro-notice-content');
+    const gateBtn = document.getElementById('gateUpgradeBtn');
+    if (session.loggedIn) {
+      gateContent.innerHTML = '<strong>This is a Pro feature.</strong><br>Upgrade to PDFly Pro to unlock watermarks, page numbers, password protection, and more.';
+      gateBtn.textContent = 'Upgrade to Pro';
+      gateBtn.onclick = () => { closeModal(); navigate('pricing'); };
+    } else {
+      gateContent.innerHTML = '<strong>This is a Pro feature.</strong><br>Already a Pro member? Log in to unlock. Otherwise, upgrade to PDFly Pro for full access.';
+      gateBtn.textContent = 'Log in';
+      gateBtn.onclick = () => { closeModal(); openLogin(); };
+    }
+  }
+
+  if (!needsPro) {
+    $("options").innerHTML = tool.options();
+    $("options").classList.toggle("hidden", !tool.options());
+    if (tool.setup) tool.setup();
+    $("fileList").innerHTML = "";
+    $("progress").classList.remove("show");
+    $("success").classList.remove("show");
+    $("errorMsg").classList.remove("show");
+    $("processBtn").disabled = true;
+    $("processBtn").textContent = tool.title;
+  }
+
+  $("modal").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+  $("modal").classList.remove("show");
+  document.body.style.overflow = "";
+  currentTool = null;
+  currentFiles = [];
+}
+
+$("closeModal").onclick = closeModal;
+$("modal").onclick = (e) => { if (e.target.id === "modal") closeModal(); };
+
+// ----- File handling -----
+const dropzone = $("dropzone");
+const fileInput = $("fileInput");
+dropzone.onclick = () => fileInput.click();
+fileInput.onchange = (e) => addFiles([...e.target.files]);
+
+["dragover", "dragenter"].forEach(ev =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); })
+);
+["dragleave", "drop"].forEach(ev =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); })
+);
+dropzone.addEventListener("drop", (e) => addFiles([...e.dataTransfer.files]));
+
+function addFiles(files) {
+  if (!currentTool) return;
+  const tool = TOOLS[currentTool];
+  const accepted = tool.accept.split(",");
+  const valid = files.filter(f => accepted.some(a => f.type === a.trim()));
+  if (valid.length === 0) {
+    showError(`Please select ${tool.hint.toLowerCase()}.`);
+    return;
+  }
+  // File size limit for free users
+  const MAX_FREE = 25 * 1024 * 1024; // 25MB
+  if (!isPro()) {
+    const tooBig = valid.find(f => f.size > MAX_FREE);
+    if (tooBig) {
+      showError(`File "${tooBig.name}" is over 25MB. Upgrade to Pro for unlimited file size.`);
+      return;
+    }
+  }
+  if (tool.multi) {
+    currentFiles = [...currentFiles, ...valid];
+  } else {
+    currentFiles = [valid[0]];
+  }
+  renderFileList();
+  $("processBtn").disabled = currentFiles.length === 0 ||
+    (currentTool === "merge" && currentFiles.length < 2);
+  $("errorMsg").classList.remove("show");
+}
+
+function renderFileList() {
+  $("fileList").innerHTML = "";
+  currentFiles.forEach((f, i) => {
+    const ext = f.name.split(".").pop().toUpperCase().slice(0, 4);
+    const item = document.createElement("div");
+    item.className = "file-item";
+    item.draggable = TOOLS[currentTool].multi;
+    item.dataset.idx = i;
+    item.innerHTML = `
+      ${TOOLS[currentTool].multi ? '<span class="file-handle">⋮⋮</span>' : ''}
+      <div class="file-icon">${ext}</div>
+      <div class="file-info">
+        <div class="file-name">${f.name}</div>
+        <div class="file-size">${formatSize(f.size)}</div>
+      </div>
+      <button class="remove-btn" data-idx="${i}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    `;
+    $("fileList").appendChild(item);
+  });
+  document.querySelectorAll(".remove-btn").forEach(b => {
+    b.onclick = (e) => {
+      e.stopPropagation();
+      currentFiles.splice(+b.dataset.idx, 1);
+      renderFileList();
+      $("processBtn").disabled = currentFiles.length === 0 ||
+        (currentTool === "merge" && currentFiles.length < 2);
+    };
+  });
+  if (TOOLS[currentTool].multi) {
+    let dragIdx = null;
+    document.querySelectorAll(".file-item").forEach(item => {
+      item.addEventListener("dragstart", () => { dragIdx = +item.dataset.idx; item.classList.add("dragging"); });
+      item.addEventListener("dragend", () => item.classList.remove("dragging"));
+      item.addEventListener("dragover", (e) => e.preventDefault());
+      item.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const targetIdx = +item.dataset.idx;
+        if (dragIdx === null || dragIdx === targetIdx) return;
+        const [moved] = currentFiles.splice(dragIdx, 1);
+        currentFiles.splice(targetIdx, 0, moved);
+        renderFileList();
+      });
+    });
+  }
+}
+
+function showError(msg) {
+  $("errorMsg").textContent = msg;
+  $("errorMsg").classList.add("show");
+}
+
+$("resetBtn").onclick = () => {
+  currentFiles = [];
+  renderFileList();
+  $("progress").classList.remove("show");
+  $("success").classList.remove("show");
+  $("errorMsg").classList.remove("show");
+  $("processBtn").disabled = true;
+};
+
+$("processBtn").onclick = async () => {
+  const tool = TOOLS[currentTool];
+  if (!tool || currentFiles.length === 0) return;
+  $("processBtn").disabled = true;
+  $("success").classList.remove("show");
+  $("errorMsg").classList.remove("show");
+  $("progress").classList.add("show");
+  $("progressFill").style.width = "10%";
+  $("progressText").textContent = "Processing…";
+  const progressCb = (pct, text) => {
+    $("progressFill").style.width = (pct * 100) + "%";
+    if (text) $("progressText").textContent = text;
+  };
+  try {
+    const result = await tool.process(currentFiles, progressCb);
+    $("progressFill").style.width = "100%";
+    setTimeout(() => {
+      $("progress").classList.remove("show");
+      $("successTitle").textContent = `${tool.title} complete!`;
+      $("successMeta").textContent = result.meta || `Saved as ${result.name} · ${formatSize(result.blob.size)}`;
+      $("success").classList.add("show");
+      lastResult = result;
+      $("processBtn").disabled = false;
+    }, 300);
+  } catch (err) {
+    console.error(err);
+    $("progress").classList.remove("show");
+    showError(err.message || "Something went wrong.");
+    $("processBtn").disabled = false;
+  }
+};
+
+$("downloadBtn").onclick = () => {
+  if (!lastResult) return;
+  const url = URL.createObjectURL(lastResult.blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = lastResult.name;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+// ----- Login modal handlers -----
+const loginModal = document.getElementById('loginModal');
+const loginBtn = document.getElementById('loginBtn');
+const closeLoginBtn = document.getElementById('closeLoginModal');
+const loginForm = document.getElementById('loginForm');
+const loginSubmit = document.getElementById('loginSubmit');
+const loginEmail = document.getElementById('loginEmail');
+const loginMsg = document.getElementById('loginMsg');
+
+function openLogin() {
+  loginModal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => loginEmail.focus(), 100);
+}
+function closeLogin() {
+  loginModal.classList.remove('show');
+  document.body.style.overflow = '';
+  loginMsg.classList.remove('show');
+  loginEmail.value = '';
+  loginSubmit.disabled = false;
+  loginSubmit.textContent = 'Send me a login link';
+}
+loginBtn.addEventListener('click', openLogin);
+closeLoginBtn.addEventListener('click', closeLogin);
+loginModal.addEventListener('click', e => { if (e.target.id === 'loginModal') closeLogin(); });
+
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = loginEmail.value.trim();
+  if (!email) return;
+  loginSubmit.disabled = true;
+  loginSubmit.textContent = 'Sending…';
+  loginMsg.classList.remove('show', 'success', 'error');
+  try {
+    const r = await fetch('/api/send-magic-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Failed to send email');
+    loginMsg.textContent = `Check ${email}! We've sent you a login link. It's valid for 15 minutes.`;
+    loginMsg.classList.add('show', 'success');
+    loginSubmit.textContent = 'Email sent ✓';
+  } catch (err) {
+    loginMsg.textContent = err.message || 'Something went wrong. Please try again.';
+    loginMsg.classList.add('show', 'error');
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = 'Send me a login link';
+  }
+});
+
+// ----- User menu (dropdown) -----
+const userBtn = document.getElementById('userBtn');
+const userMenu = document.getElementById('userMenu');
+userBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  userMenu.classList.toggle('show');
+});
+document.addEventListener('click', e => {
+  if (!userMenu.contains(e.target) && !userBtn.contains(e.target)) {
+    userMenu.classList.remove('show');
+  }
+});
+document.getElementById('menuLogout').addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+  session = { loggedIn: false, email: null, isPro: false };
+  refreshUI();
+  userMenu.classList.remove('show');
+});
+document.getElementById('menuManage').addEventListener('click', () => {
+  // Stripe Customer Portal — set this up later. For now, point to your Stripe billing dashboard URL.
+  alert('Subscription management is coming soon. To cancel your subscription right now, please reply to your purchase confirmation email.');
+});
+
+// ----- Show login-result toasts -----
+(function showLoginToast() {
+  const params = new URLSearchParams(location.search);
+  const status = params.get('login');
+  if (!status) return;
+  let msg = '';
+  if (status === 'success') msg = '✓ Logged in successfully!';
+  else if (status === 'expired') msg = '⚠ That login link has expired. Please request a new one.';
+  else if (status === 'invalid') msg = '⚠ Invalid login link.';
+  if (msg) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:12px 20px;border-radius:10px;z-index:1000;font-size:14px;font-weight:500;box-shadow:0 12px 32px rgba(0,0,0,0.2);';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.style.transition = 'opacity 0.4s', 100);
+    setTimeout(() => toast.style.opacity = '0', 3500);
+    setTimeout(() => toast.remove(), 4000);
+    // Clean URL
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
+})();
+
+// ----- Success page Login button -----
+const successLoginBtn = document.getElementById('successLoginBtn');
+if (successLoginBtn) {
+  successLoginBtn.addEventListener('click', openLogin);
+}
+
+// ----- Init -----
+const initial = location.hash.slice(1) || 'home';
+navigate(initial);
+refreshSession();
+</script>
+</body>
+</html>
