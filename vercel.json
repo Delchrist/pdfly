@@ -6,6 +6,28 @@
   "trailingSlash": true,
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "pdfly.lol"
+        }
+      ],
+      "destination": "https://zoungpdf.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pdfly.lol"
+        }
+      ],
+      "destination": "https://zoungpdf.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/merge",
       "destination": "/merge-pdf/",
       "permanent": true
