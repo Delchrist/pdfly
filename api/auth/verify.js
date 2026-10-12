@@ -7,8 +7,8 @@ import { createSessionCookie } from '../_lib/session.js';
 
 function page(title, inner) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>${escapeHtml(title)} · PDFly</title><link rel="stylesheet" href="/assets/app.css"></head>
-<body><main class="auth-page"><div class="auth-card"><a class="logo" href="/"><span class="logo-mark"></span>PDFly</a>${inner}</div></main></body></html>`;
+<meta name="robots" content="noindex"><title>${escapeHtml(title)} · ZoungPDF</title><link rel="stylesheet" href="/assets/app.css"></head>
+<body><main class="auth-page"><div class="auth-card"><a class="logo" href="/"><span class="logo-mark"></span>ZoungPDF</a>${inner}</div></main></body></html>`;
 }
 
 export async function GET(request) {
@@ -17,7 +17,7 @@ export async function GET(request) {
   return html(
     page(
       'Sign in',
-      `<h1>Sign in to PDFly</h1><p class="muted">Se connecter à PDFly</p>
+      `<h1>Sign in to ZoungPDF</h1><p class="muted">Se connecter à ZoungPDF</p>
 <form method="post" action="/api/auth/verify"><input type="hidden" name="token" value="${escapeHtml(token)}">
 <button class="btn btn-primary btn-lg" type="submit" autofocus>Continue · Continuer</button></form>`
     )

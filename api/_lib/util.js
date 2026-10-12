@@ -1,7 +1,7 @@
-// Shared helpers for PDFly serverless functions (Vercel, Node runtime, Web Request/Response API).
+// Shared helpers for ZoungPDF serverless functions (Vercel, Node runtime, Web Request/Response API).
 import crypto from 'node:crypto';
 
-export const SITE_URL = (process.env.SITE_URL || 'https://pdfly.lol').replace(/\/$/, '');
+export const SITE_URL = (process.env.SITE_URL || 'https://zoungpdf.com').replace(/\/$/, '');
 
 export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), {

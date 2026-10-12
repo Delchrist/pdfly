@@ -78,4 +78,4 @@ http.createServer((req, res) => {
   }
   if (url.pathname.startsWith('/api/')) return handleApi(req, res, url);
   serveStatic(req, res, url);
-}).listen(PORT, () => console.log(`PDFly dev server on http://localhost:${PORT}${process.env.MOCK === '1' ? ' (mocks on)' : ''}`));
+}).listen(PORT, () => console.log(`ZoungPDF dev server on http://localhost:${PORT}${process.env.MOCK === '1' ? ' (mocks on)' : ''}`));

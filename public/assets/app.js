@@ -1,13 +1,13 @@
-// PDFly front end: account, sign-in, checkout, and the tool runner.
+// ZoungPDF front end: account, sign-in, checkout, and the tool runner.
 const LANG = document.body.dataset.lang === 'fr' ? 'fr' : 'en';
 const P = LANG === 'fr' ? '/fr' : '';
 
 const STR = {
   en: {
-    signin: 'Sign in', account: 'Account', signinTitle: 'Sign in to PDFly', signinLead: 'We’ll email you a 6-digit code. No password needed.',
+    signin: 'Sign in', account: 'Account', signinTitle: 'Sign in to ZoungPDF', signinLead: 'We’ll email you a 6-digit code. No password needed.',
     email: 'Email address', sendCode: 'Email me a code', codeTitle: 'Check your email', codeLead: (e) => `We sent a 6-digit code to ${e}. It may take a minute to arrive.`,
     verify: 'Sign in', useOther: 'Use a different email', resend: 'Resend code', sending: 'Sending…', checking: 'Checking…',
-    proTitle: 'Unlock with PDFly Pro', proLead: 'Watermarks, page numbers, password protection, e-signatures, batch processing and files up to 1 GB.',
+    proTitle: 'Unlock with ZoungPDF Pro', proLead: 'Watermarks, page numbers, password protection, e-signatures, batch processing and files up to 1 GB.',
     seePlans: 'See plans', notNow: 'Not now', perMonth: '/month', perYear: '/year', equals: (x) => `That’s ${x}/month, billed yearly`,
     billedMonthly: 'Billed monthly. Cancel anytime.', redirecting: 'Redirecting to secure checkout…', alreadyPro: 'You already have Pro.',
     plan: 'Plan', free: 'Free', pro: 'Pro', status: 'Status', renews: 'Renews', ends: 'Ends', billing: 'Billing', manage: 'Manage billing', signout: 'Sign out', upgrade: 'Upgrade to Pro',
@@ -16,10 +16,10 @@ const STR = {
     pastDue: 'Payment issue: please update your card.',
   },
   fr: {
-    signin: 'Connexion', account: 'Compte', signinTitle: 'Se connecter à PDFly', signinLead: 'Nous vous envoyons un code à 6 chiffres. Aucun mot de passe.',
+    signin: 'Connexion', account: 'Compte', signinTitle: 'Se connecter à ZoungPDF', signinLead: 'Nous vous envoyons un code à 6 chiffres. Aucun mot de passe.',
     email: 'Adresse courriel', sendCode: 'Recevoir un code', codeTitle: 'Vérifiez vos courriels', codeLead: (e) => `Code envoyé à ${e}. Il peut prendre une minute à arriver.`,
     verify: 'Se connecter', useOther: 'Utiliser un autre courriel', resend: 'Renvoyer le code', sending: 'Envoi…', checking: 'Vérification…',
-    proTitle: 'Débloquez avec PDFly Pro', proLead: 'Filigranes, numérotation, mot de passe, signature, traitement par lots et fichiers jusqu’à 1 Go.',
+    proTitle: 'Débloquez avec ZoungPDF Pro', proLead: 'Filigranes, numérotation, mot de passe, signature, traitement par lots et fichiers jusqu’à 1 Go.',
     seePlans: 'Voir les forfaits', notNow: 'Plus tard', perMonth: '/mois', perYear: '/an', equals: (x) => `Soit ${x}/mois, facturé annuellement`,
     billedMonthly: 'Facturé mensuellement. Annulable en tout temps.', redirecting: 'Redirection vers le paiement sécurisé…', alreadyPro: 'Vous avez déjà Pro.',
     plan: 'Forfait', free: 'Gratuit', pro: 'Pro', status: 'Statut', renews: 'Renouvellement', ends: 'Se termine', billing: 'Facturation', manage: 'Gérer la facturation', signout: 'Se déconnecter', upgrade: 'Passer à Pro',

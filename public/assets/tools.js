@@ -1,4 +1,4 @@
-// PDFly tool implementations. Everything runs locally in the browser.
+// ZoungPDF tool implementations. Everything runs locally in the browser.
 import { PDFDocument, StandardFonts, rgb, degrees } from '/vendor/pdf-lib.esm.min.js';
 import * as pdfjs from '/vendor/pdf.min.mjs';
 
@@ -16,9 +16,9 @@ const STRINGS = {
   en: {
     addMore: 'Add more files', remove: 'Remove', pages: (n) => `${n} page${n === 1 ? '' : 's'}`, startOver: 'Start over',
     working: 'Working…', done: 'Done!', download: 'Download', downloadAgain: 'Download again', another: 'Process another file',
-    tooBig: (n, lim) => `${n} is larger than ${lim}. PDFly Pro handles files up to 1 GB.`, notPdf: (n) => `${n} isn’t a PDF.`, notImage: (n) => `${n} isn’t an image.`,
+    tooBig: (n, lim) => `${n} is larger than ${lim}. ZoungPDF Pro handles files up to 1 GB.`, notPdf: (n) => `${n} isn’t a PDF.`, notImage: (n) => `${n} isn’t an image.`,
     encrypted: 'This PDF is password-protected. Remove the password first, then try again.', broken: 'We couldn’t read this PDF. It may be damaged.',
-    proGate: 'This is a Pro tool. Try it out and preview the result; downloading needs PDFly Pro.', batchGate: 'Processing several files at once is a Pro feature. Free users can process one file at a time.', unlock: 'Unlock Pro',
+    proGate: 'This is a Pro tool. Try it out and preview the result; downloading needs ZoungPDF Pro.', batchGate: 'Processing several files at once is a Pro feature. Free users can process one file at a time.', unlock: 'Unlock Pro',
     merge: 'Merge PDFs', needTwo: 'Add at least two PDFs to merge.', dragHint: 'Drag to reorder',
     split: 'Split PDF', mode: 'Mode', everyPage: 'Every page', ranges: 'Ranges', chunks: 'Every N pages', rangesLabel: 'Page ranges', rangesPh: 'e.g. 1-3, 5, 8-10', chunkLabel: 'Pages per file', badRange: 'Check your ranges. Use page numbers between 1 and {n}, like 1-3, 5.',
     compress: 'Compress', level: 'Compression level', light: 'Light', recommended: 'Recommended', strong: 'Strong',
@@ -37,9 +37,9 @@ const STRINGS = {
   fr: {
     addMore: 'Ajouter des fichiers', remove: 'Retirer', pages: (n) => `${n} page${n > 1 ? 's' : ''}`, startOver: 'Recommencer',
     working: 'Traitement…', done: 'Terminé !', download: 'Télécharger', downloadAgain: 'Télécharger à nouveau', another: 'Traiter un autre fichier',
-    tooBig: (n, lim) => `${n} dépasse ${lim}. PDFly Pro accepte jusqu’à 1 Go.`, notPdf: (n) => `${n} n’est pas un PDF.`, notImage: (n) => `${n} n’est pas une image.`,
+    tooBig: (n, lim) => `${n} dépasse ${lim}. ZoungPDF Pro accepte jusqu’à 1 Go.`, notPdf: (n) => `${n} n’est pas un PDF.`, notImage: (n) => `${n} n’est pas une image.`,
     encrypted: 'Ce PDF est protégé par un mot de passe. Retirez-le puis réessayez.', broken: 'Impossible de lire ce PDF. Il est peut-être endommagé.',
-    proGate: 'Outil Pro. Essayez-le et prévisualisez le résultat ; le téléchargement requiert PDFly Pro.', batchGate: 'Le traitement de plusieurs fichiers à la fois est une fonction Pro. En gratuit, un fichier à la fois.', unlock: 'Débloquer Pro',
+    proGate: 'Outil Pro. Essayez-le et prévisualisez le résultat ; le téléchargement requiert ZoungPDF Pro.', batchGate: 'Le traitement de plusieurs fichiers à la fois est une fonction Pro. En gratuit, un fichier à la fois.', unlock: 'Débloquer Pro',
     merge: 'Fusionner', needTwo: 'Ajoutez au moins deux PDF.', dragHint: 'Glissez pour réordonner',
     split: 'Diviser', mode: 'Mode', everyPage: 'Chaque page', ranges: 'Plages', chunks: 'Toutes les N pages', rangesLabel: 'Plages de pages', rangesPh: 'ex. 1-3, 5, 8-10', chunkLabel: 'Pages par fichier', badRange: 'Vérifiez vos plages : pages entre 1 et {n}, comme 1-3, 5.',
     compress: 'Compresser', level: 'Niveau de compression', light: 'Léger', recommended: 'Recommandé', strong: 'Fort',
@@ -299,7 +299,7 @@ class Runner {
   // result: { outputs: [{name, blob}], zipName?, stats? }
   async showResult({ outputs, zipName, stats }) {
     let file = outputs[0];
-    if (outputs.length > 1) file = await zipOutputs(outputs, zipName || 'pdfly.zip');
+    if (outputs.length > 1) file = await zipOutputs(outputs, zipName || 'zoungpdf.zip');
     saveBlob(file.blob, file.name);
     const again = h('button', { class: 'btn btn-primary btn-lg', type: 'button', onclick: () => saveBlob(file.blob, file.name) }, `${S.downloadAgain} (${fmtSize(file.blob.size)})`);
     this.root.replaceChildren(h('div', { class: 'result' },

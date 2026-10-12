@@ -5,7 +5,7 @@ import { TOOLS, ICONS, COMMON_FAQ } from './tools.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const OUT = path.join(ROOT, 'public');
-const SITE = 'https://pdfly.lol';
+const SITE = 'https://zoungpdf.com';
 const VERSION = Date.now().toString(36);
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -73,7 +73,7 @@ ${altPath ? `<link rel="alternate" hreflang="en" href="${SITE}${enPath}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:url" content="${SITE}${canonicalPath}">
-<meta property="og:site_name" content="PDFly">
+<meta property="og:site_name" content="ZoungPDF">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#e5484d">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -89,7 +89,7 @@ function header(lang, altPath) {
     return `<a href="${toolUrl(tool, lang)}"><span class="ico${tool.pro ? ' pro' : ''}">${ICONS[tool.icon]}</span>${esc(c.name)}${tool.pro ? ` <span class="badge">${t.proBadge}</span>` : ''}</a>`;
   }).join('');
   return `<header class="site-header"><div class="container">
-<a class="logo" href="${prefix(lang) || '/'}${lang === 'fr' ? '/' : ''}" aria-label="PDFly home"><span class="logo-mark"></span>PDFly</a>
+<a class="logo" href="${prefix(lang) || '/'}${lang === 'fr' ? '/' : ''}" aria-label="ZoungPDF home"><span class="logo-mark"></span>ZoungPDF</a>
 <nav class="nav">
 <div class="nav-tools"><button class="link" type="button" data-menu-toggle aria-expanded="false">${t.tools} ▾</button><div class="menu hidden" data-menu>${menu}</div></div>
 <a href="${prefix(lang)}/pricing/" class="hide-sm">${t.pricing}</a>
@@ -102,9 +102,9 @@ function footer(lang) {
   const t = T[lang];
   const links = TOOLS.map((tool) => `<a href="${toolUrl(tool, lang)}">${esc(tool[lang].name)}</a>`).join('');
   return `<footer class="site-footer"><div class="container">
-<div><a class="logo" href="${lang === 'fr' ? '/fr/' : '/'}"><span class="logo-mark"></span>PDFly</a><p>${t.footerTag}</p>
-<nav><a href="${prefix(lang)}/pricing/">${t.pricing}</a><a href="/privacy/">${t.privacy}</a><a href="/terms/">${t.terms}</a><a href="mailto:hello@pdfly.lol">${t.contact}</a></nav>
-<p class="small">© ${new Date().getFullYear()} PDFly</p></div>
+<div><a class="logo" href="${lang === 'fr' ? '/fr/' : '/'}"><span class="logo-mark"></span>ZoungPDF</a><p>${t.footerTag}</p>
+<nav><a href="${prefix(lang)}/pricing/">${t.pricing}</a><a href="/privacy/">${t.privacy}</a><a href="/terms/">${t.terms}</a><a href="mailto:hello@zoungpdf.com">${t.contact}</a></nav>
+<p class="small">© ${new Date().getFullYear()} ZoungPDF</p></div>
 <nav style="max-width:560px">${links}</nav>
 </div></footer>`;
 }
@@ -143,11 +143,11 @@ for (const lang of ['en', 'fr']) {
   const homePath = lang === 'fr' ? '/fr/' : '/';
   write(`${lang === 'fr' ? 'fr/' : ''}index.html`, shell({
     lang,
-    title: lang === 'fr' ? 'PDFly — Outils PDF gratuits et privés' : 'PDFly — Free, Private PDF Tools in Your Browser',
+    title: lang === 'fr' ? 'ZoungPDF — Outils PDF gratuits et privés' : 'ZoungPDF — Free, Private PDF Tools in Your Browser',
     desc: t.heroLead,
     canonicalPath: homePath,
     altPath: lang === 'fr' ? '/' : '/fr/',
-    jsonld: { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'PDFly', url: SITE, applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' } },
+    jsonld: { '@context': 'https://schema.org', '@type': 'WebApplication', name: 'ZoungPDF', url: SITE, applicationCategory: 'UtilitiesApplication', operatingSystem: 'Any', offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' } },
     body: `<section class="hero"><div class="container">
 <h1>${t.heroTitle}</h1><p class="lead">${t.heroLead}</p>
 <div class="trust">${t.trust.map((x) => `<span>${esc(x)}</span>`).join('')}</div>
@@ -199,7 +199,7 @@ for (const lang of ['en', 'fr']) {
   const priceP = `${prefix(lang)}/pricing/`;
   write(`${priceP.slice(1)}index.html`, shell({
     lang,
-    title: lang === 'fr' ? 'Tarifs — PDFly Pro' : 'Pricing — PDFly Pro',
+    title: lang === 'fr' ? 'Tarifs — ZoungPDF Pro' : 'Pricing — ZoungPDF Pro',
     desc: t.pricingLead,
     canonicalPath: priceP,
     altPath: `${prefix(other)}/pricing/`,
@@ -222,7 +222,7 @@ for (const lang of ['en', 'fr']) {
   const accP = `${prefix(lang)}/account/`;
   write(`${accP.slice(1)}index.html`, shell({
     lang,
-    title: `${t.accountTitle} — PDFly`,
+    title: `${t.accountTitle} — ZoungPDF`,
     desc: t.accountTitle,
     canonicalPath: accP,
     altPath: `${prefix(other)}/account/`,
@@ -234,32 +234,32 @@ for (const lang of ['en', 'fr']) {
 
 // Login page (fallback for expired links)
 write('login/index.html', shell({
-  lang: 'en', title: 'Sign in — PDFly', desc: 'Sign in to PDFly', canonicalPath: '/login/', noindex: true, bodyAttrs: 'data-page="login"',
+  lang: 'en', title: 'Sign in — ZoungPDF', desc: 'Sign in to ZoungPDF', canonicalPath: '/login/', noindex: true, bodyAttrs: 'data-page="login"',
   body: `<div class="container"><div class="tool-head"><h1>Sign in</h1><p>We'll email you a 6-digit code. No password needed.</p></div><div style="max-width:420px;margin:0 auto 64px" id="login-root"></div></div>`,
 }));
 
 // Legal
 const legal = {
-  privacy: ['Privacy Policy', `<p><strong>Short version: your PDFs never leave your device.</strong> Every PDFly tool runs inside your web browser. We do not upload, store or see the files you process.</p>
+  privacy: ['Privacy Policy', `<p><strong>Short version: your PDFs never leave your device.</strong> Every ZoungPDF tool runs inside your web browser. We do not upload, store or see the files you process.</p>
 <h2>What we collect</h2><ul><li><strong>Account email</strong>, if you sign in, so we can send sign-in codes and link your Pro subscription.</li><li><strong>Subscription status</strong> (plan, renewal date) synced from Stripe.</li><li><strong>Basic server logs</strong> (IP address, time) kept briefly by our hosting provider for security and rate limiting.</li></ul>
 <h2>Payments</h2><p>Payments are handled by Stripe. We never see or store your card number. See <a href="https://stripe.com/privacy">Stripe's privacy policy</a>.</p>
 <h2>Service providers</h2><p>Vercel (hosting), Upstash (account database), Resend (email), Stripe (payments).</p>
-<h2>Your choices</h2><p>Email <a href="mailto:hello@pdfly.lol">hello@pdfly.lol</a> to access or delete your account data. Cancel your subscription anytime from your account page.</p>
+<h2>Your choices</h2><p>Email <a href="mailto:hello@zoungpdf.com">hello@zoungpdf.com</a> to access or delete your account data. Cancel your subscription anytime from your account page.</p>
 <p class="muted">Last updated: ${new Date().toISOString().slice(0, 10)}</p>`],
-  terms: ['Terms of Service', `<p>By using PDFly you agree to these terms.</p>
-<h2>The service</h2><p>PDFly provides PDF tools that run in your browser. Free tools are provided as-is. PDFly Pro is a paid subscription that unlocks additional tools and limits.</p>
+  terms: ['Terms of Service', `<p>By using ZoungPDF you agree to these terms.</p>
+<h2>The service</h2><p>ZoungPDF provides PDF tools that run in your browser. Free tools are provided as-is. ZoungPDF Pro is a paid subscription that unlocks additional tools and limits.</p>
 <h2>Subscriptions</h2><ul><li>Pro renews automatically each month or year until cancelled.</li><li>You can cancel anytime from your account page; you keep Pro until the end of the period you paid for.</li><li>Prices are in Canadian dollars; applicable taxes are added at checkout.</li><li>If you are unhappy within 14 days of your first payment, email us for a full refund.</li></ul>
 <h2>Your files</h2><p>You are responsible for the documents you process and must have the right to modify them. Because processing happens on your device, we cannot recover files or passwords.</p>
-<h2>Liability</h2><p>PDFly is provided "as is" without warranties. To the extent permitted by law, our liability is limited to the amount you paid in the last 12 months.</p>
-<h2>Contact</h2><p><a href="mailto:hello@pdfly.lol">hello@pdfly.lol</a></p>
+<h2>Liability</h2><p>ZoungPDF is provided "as is" without warranties. To the extent permitted by law, our liability is limited to the amount you paid in the last 12 months.</p>
+<h2>Contact</h2><p><a href="mailto:hello@zoungpdf.com">hello@zoungpdf.com</a></p>
 <p class="muted">Last updated: ${new Date().toISOString().slice(0, 10)}</p>`],
 };
 for (const [slug, [title, body]] of Object.entries(legal)) {
-  write(`${slug}/index.html`, shell({ lang: 'en', title: `${title} — PDFly`, desc: title, canonicalPath: `/${slug}/`, body: `<div class="container prose"><h1>${title}</h1>${body}</div>` }));
+  write(`${slug}/index.html`, shell({ lang: 'en', title: `${title} — ZoungPDF`, desc: title, canonicalPath: `/${slug}/`, body: `<div class="container prose"><h1>${title}</h1>${body}</div>` }));
   sitemap.push(`/${slug}/`);
 }
 
-write('404.html', shell({ lang: 'en', title: 'Page not found — PDFly', desc: 'Not found', canonicalPath: '/404', noindex: true, body: `<div class="container"><div class="tool-head"><h1>Page not found</h1><p>Try one of our tools instead.</p></div><div class="tool-grid" style="margin-bottom:56px">${toolCards('en')}</div></div>` }));
+write('404.html', shell({ lang: 'en', title: 'Page not found — ZoungPDF', desc: 'Not found', canonicalPath: '/404', noindex: true, body: `<div class="container"><div class="tool-head"><h1>Page not found</h1><p>Try one of our tools instead.</p></div><div class="tool-grid" style="margin-bottom:56px">${toolCards('en')}</div></div>` }));
 
 write('favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M7 2h12l7 7v19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#e5484d"/><path d="M19 2v7h7" fill="#f7a8aa"/></svg>`);
 write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /account/\nSitemap: ${SITE}/sitemap.xml\n`);

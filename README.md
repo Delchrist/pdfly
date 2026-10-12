@@ -1,6 +1,6 @@
-# PDFly v3
+# ZoungPDF v3
 
-Private PDF tools that run entirely in the browser, with a Stripe-powered Pro plan. Live at https://pdfly.lol.
+Private PDF tools that run entirely in the browser, with a Stripe-powered Pro plan. Live at https://zoungpdf.com.
 
 ## What's here
 
@@ -28,9 +28,9 @@ Prices come live from Stripe via the lookup keys `pdfly_pro_monthly` and `pdfly_
 | Name | Notes |
 |---|---|
 | `STRIPE_SECRET_KEY` | Live secret key |
-| `STRIPE_WEBHOOK_SECRET` | From the webhook endpoint `https://pdfly.lol/api/stripe-webhook/` (keep the trailing slash: the site redirects URLs without one, and Stripe does not follow redirects) |
-| `RESEND_API_KEY` | Sending domain pdfly.lol |
-| `FROM_EMAIL` | e.g. `PDFly <hello@pdfly.lol>` |
+| `STRIPE_WEBHOOK_SECRET` | From the webhook endpoint `https://zoungpdf.com/api/stripe-webhook/` (keep the trailing slash: the site redirects URLs without one, and Stripe does not follow redirects) |
+| `RESEND_API_KEY` | Sending domain zoungpdf.com |
+| `FROM_EMAIL` | e.g. `ZoungPDF <hello@zoungpdf.com>` |
 | `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Upstash Redis (set by the Vercel integration) |
 | `SESSION_SECRET` | Random 32+ chars, signs login cookies |
 

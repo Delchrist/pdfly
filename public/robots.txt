@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /account/
-Sitemap: https://pdfly.lol/sitemap.xml
+Sitemap: https://zoungpdf.com/sitemap.xml
