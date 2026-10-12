@@ -28,7 +28,7 @@ Prices come live from Stripe via the lookup keys `pdfly_pro_monthly` and `pdfly_
 | Name | Notes |
 |---|---|
 | `STRIPE_SECRET_KEY` | Live secret key |
-| `STRIPE_WEBHOOK_SECRET` | From the webhook endpoint `https://pdfly.lol/api/stripe-webhook` |
+| `STRIPE_WEBHOOK_SECRET` | From the webhook endpoint `https://pdfly.lol/api/stripe-webhook/` (keep the trailing slash: the site redirects URLs without one, and Stripe does not follow redirects) |
 | `RESEND_API_KEY` | Sending domain pdfly.lol |
 | `FROM_EMAIL` | e.g. `PDFly <hello@pdfly.lol>` |
 | `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Upstash Redis (set by the Vercel integration) |
