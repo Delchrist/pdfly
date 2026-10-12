@@ -1,20 +1,64 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/api/stripe-webhook", "destination": "/api/stripe-webhook.js" },
-    { "source": "/api/send-magic-link", "destination": "/api/send-magic-link.js" },
-    { "source": "/api/verify-magic-link", "destination": "/api/verify-magic-link.js" },
-    { "source": "/api/me", "destination": "/api/me.js" },
-    { "source": "/api/logout", "destination": "/api/logout.js" }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "public",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/merge",
+      "destination": "/merge-pdf/",
+      "permanent": true
+    },
+    {
+      "source": "/split",
+      "destination": "/split-pdf/",
+      "permanent": true
+    },
+    {
+      "source": "/compress",
+      "destination": "/compress-pdf/",
+      "permanent": true
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/vendor/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
   ]

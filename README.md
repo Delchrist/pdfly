@@ -1,38 +1,45 @@
- PDFly
+# PDFly v3
 
-Every PDF tool you need, in one place. Free for everyone, supercharged for Pro members.
+Private PDF tools that run entirely in the browser, with a Stripe-powered Pro plan. Live at https://pdfly.lol.
 
-## Quick start
+## What's here
 
-1. Read `DEPLOYMENT_GUIDE.md` — it walks you through everything.
-2. Push these files to a GitHub repo.
-3. Import to Vercel → set 3 environment variables → done.
+| Path | Purpose |
+|---|---|
+| `public/` | The static site served by Vercel (generated pages + `assets/` + `vendor/` libraries) |
+| `public/assets/app.js` | Account, sign-in modal, pricing and checkout |
+| `public/assets/tools.js` | All 13 PDF tools (pdf-lib + pdf.js, client-side) |
+| `scripts/tools.mjs` | Tool catalogue and bilingual SEO copy. **Edit this to change tool text** |
+| `scripts/build.mjs` | Generates every page in `public/` (EN + FR, sitemap, robots) |
+| `api/` | Vercel Functions: sign-in, `/api/me`, checkout, billing portal, Stripe webhook |
+| `tests/` | API tests against in-memory fakes (`npm test`) |
 
-## What's in this folder
+After editing `scripts/*.mjs`, run `npm run build` and commit the regenerated `public/` folder.
 
-| File | What it does |
-|------|--------------|
-| `index.html` | The entire website — landing page, tools, pricing, success/cancel pages. Tools work 100% in-browser. |
-| `api/create-checkout.js` | Vercel serverless function that creates a Stripe Checkout session when someone clicks "Upgrade to Pro". |
-| `package.json` | Lists the one dependency (`stripe`) that the API function needs. |
-| `vercel.json` | Vercel deployment config + security headers. |
-| `DEPLOYMENT_GUIDE.md` | Step-by-step instructions to deploy and configure payments. |
+## Free vs Pro
 
-## Tools included
+- **Free:** merge, split, compress, organize, rotate, delete, extract, JPG→PDF, PDF→JPG, files up to 25 MB
+- **Pro:** watermark, page numbers, password protection, signatures, batch processing, files up to 1 GB
 
-**Free**
-- Merge PDF · Split PDF · Compress PDF · Rotate PDF · JPG to PDF · PDF to JPG
+Prices come live from Stripe via the lookup keys `pdfly_pro_monthly` and `pdfly_pro_yearly`. To change a price, create a new Stripe price and move the lookup key to it (with "transfer lookup key"); no code change is needed.
 
-**Pro**
-- Watermark · Page Numbers · Protect PDF · Unlimited file size
+## Environment variables (Vercel)
 
-## Tech
+| Name | Notes |
+|---|---|
+| `STRIPE_SECRET_KEY` | Live secret key |
+| `STRIPE_WEBHOOK_SECRET` | From the webhook endpoint `https://pdfly.lol/api/stripe-webhook` |
+| `RESEND_API_KEY` | Sending domain pdfly.lol |
+| `FROM_EMAIL` | e.g. `PDFly <hello@pdfly.lol>` |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Upstash Redis (set by the Vercel integration) |
+| `SESSION_SECRET` | Random 32+ chars, signs login cookies |
 
-- Pure HTML/CSS/JS — no build step
-- PDF processing via [pdf-lib](https://pdf-lib.js.org/) and [pdf.js](https://mozilla.github.io/pdf.js/)
-- Payments via [Stripe Checkout](https://stripe.com/payments/checkout)
-- Hosted on [Vercel](https://vercel.com)
+Stripe webhook events used: `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.paid`, `invoice.payment_failed`.
 
-## License
+## Local development
 
-MIT — do whatever you want.
+```bash
+npm install           # only needed to refresh vendor libs
+MOCK=1 npm run dev    # http://localhost:8787 with fake Stripe/Redis/email
+npm test
+```
